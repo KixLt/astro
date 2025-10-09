@@ -1,49 +1,152 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import cfg from 'blog.config'
+import Background from '@/components/Background/index.vue'
+import HeadMeta from '@/components/HeadMeta.astro'
+import '@/styles/global.scss'
+
+const {
+  WebsiteSettings: { base, title },
+} = cfg;
+
+
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
+<html lang="zh">
+  <head>
+    <HeadMeta />
+    <link rel="icon" href={`${cfg.WebsiteSettings.base}/favicon.svg`} />
+  </head>
+  <body>
+    <Background client:load />
+    <div class="index-wrapper w100 h100">
+      <div class="index-wrapper__modal">
+        <img
+          class="index-wrapper__modal__img"
+          src={`${base}/img/avatar.jpg`}
+          alt="avatar"
+          width="160"
+          height="160"
+        />
+        <div class="text-wrapper">
+          <div class="text-wrapper__name">{cfg.UserInfo.name}</div>
+          <div class="text-wrapper__description">
+            {cfg.UserInfo.introduction}
+          </div>
+          <div class="text-wrapper__skill"></div>
+        </div>
+        <div class="button-wrapper">
+          <a href={`${base}/blog`} class="button-wrapper__basic enter">进入</a>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
+
+<script
+  src={`${base}/js/particles/canvas-nest.js`}
+  color="0,0,0"
+  opacity="1"
+  zIndex="-2"
+  count="99"
+  is:inline
+></script>
+
+<style lang="scss">
+  .index-wrapper {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .index-wrapper__modal {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    width: 18rem;
+    height: 30rem;
+    padding: 0 2rem;
+    background-image: linear-gradient(
+        90deg,
+        rgba(99, 99, 99, 0.1),
+        rgba(99, 99, 99, 0.1) 1px,
+        transparent 0,
+        transparent
+      ),
+      linear-gradient(90deg, hsla(0, 0%, 100%, 0.1) -20%, transparent 15%),
+      linear-gradient(0deg, hsla(0, 0%, 100%, 0.1), transparent 25%);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid hsla(0, 0%, 100%, 0.4941176471);
+    border-left: 1px solid hsla(0, 0%, 100%, 0.4941176471);
+    box-shadow: 0 0 10px 5px hsla(0, 0%, 100%, 0.15);
+    backdrop-filter: blur(3px);
+    border-radius: 1rem;
+    color: #fff;
+    text-shadow: 0 0 2px #000;
+  }
+
+  .index-wrapper__modal__img {
+    width: 10rem;
+    border-radius: 100vh;
+  }
+
+  .text-wrapper {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .text-wrapper__name {
+    font-size: 1.4rem;
+  }
+
+  .text-wrapper__skill {
+    margin-top: 0.4rem;
+    text-align: center;
+  }
+
+  .button-wrapper {
+    width: 100%;
+    margin: 0.4rem 0;
+  }
+
+  .button-wrapper__basic {
+    display: block;
+    width: 100%;
+    height: 2.1rem;
+    line-height: 1.9rem;
+    margin: 0.6rem 0;
+    font-size: 1rem;
+    text-align: center;
+    text-shadow: 0 0 1px #000;
+    box-shadow: 0 5px 10px hsla(0, 0%, 0%, 0.25);
+    border-radius: 8px;
+    transition:
+      color 0.3s,
+      background-color 0.3s;
+
+    &.enter {
+      background-color: var(--background-default);
+      border: 0.1rem solid var(--background-default);
+
+      &:hover {
+        color: #fff;
+        background-color: transparent;
+      }
+    }
+
+    &.github {
+      color: #fff;
+      border: 0.1rem solid #fff;
+
+      &:hover {
+        color: #000;
+        background-color: #fff;
+      }
+    }
+  }
+</style>

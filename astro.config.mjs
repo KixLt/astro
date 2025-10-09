@@ -8,5 +8,5 @@ import UnoCSS from 'unocss/astro'
 export default defineConfig({
   site: 'https://kixlt.github.io',
   base: '/astro',
-  integrations: [mdx(), sitemap(), UnoCSS(), vue()],
+  integrations: [mdx(), sitemap(), UnoCSS({ injectReset: true }), vue()],
 })

@@ -1,7 +1,7 @@
 import defineBlogConfig from './src/declare/defineBlogConfig.ts'
 
-const site = `https://qingxia-ela.github.io`
-const base = `/Shiina-Astro-Blog`
+const site = `https://KixLt.github.io`
+const base = `/astro`
 
 export default defineBlogConfig({
   PageDefaultSettings: {
@@ -12,14 +12,13 @@ export default defineBlogConfig({
     footer: {
       content: [
         '<div>Powered by Astro & Vue</div>',
-        '<a href="https://github.com/QingXia-Ela/Shiina-Astro-Blog/" target="_blank">Github Link</a>',
       ],
     },
   },
   UserInfo: {
     name: 'KixLt',
     introduction: 'pure gamer',
-    avatar: '/avatar/avatar2.jpg',
+    avatar: '/avatar/avatar.jpg',
     link: [
       {
         sitename: 'Github',
@@ -35,14 +34,7 @@ export default defineBlogConfig({
     useIndex: true,
     base,
   },
-  SearchConfig: {
-    active: true,
-    mode: 'static',
-  },
   pages: {
-    friends: {
-      FriendList: [],
-    },
     index: {
       header: {
         hidden: true,

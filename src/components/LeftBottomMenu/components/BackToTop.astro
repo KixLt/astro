@@ -1,0 +1,42 @@
+---
+---
+
+<div class="back_to_top w100 h100" id="BackToTopButton">
+  <div class="arrowup"></div>
+</div>
+
+<script>
+  document.getElementById("BackToTopButton")?.addEventListener("click", () => {
+    document.querySelector("html")!.scrollIntoView({
+      behavior: "smooth",
+    });
+  });
+</script>
+
+<style lang="scss">
+  .back_to_top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    .arrowup {
+      display: block;
+      width: 0.8rem;
+      height: 0.8rem;
+      border: 0.1rem solid var(--text-default);
+      border-top: none;
+      border-top-width: medium;
+      border-right: none;
+      border-right-width: medium;
+      transform: translateY(35%) rotate(135deg);
+      transition: border-color 0.3s;
+    }
+
+    &:hover {
+      .arrowup {
+        border-color: var(--tips-default);
+      }
+    }
+  }
+</style>

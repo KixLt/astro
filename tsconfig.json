@@ -5,9 +5,9 @@
     "target": "ESNext",
     "jsx": "preserve",
     "baseUrl": "./",
-    "module": "nodenext",
+    "module": "esnext",
     // Enable node-style module resolution, for things like npm package imports.
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node",
     "paths": {
       "@/*": [
         "src/*"
@@ -15,6 +15,7 @@
     },
     // Enable JSON imports.
     "resolveJsonModule": true,
+    "types": ["node", "astro/client"],
     "strictNullChecks": true,
     // Astro will directly run your TypeScript code, no transpilation needed.
     "noEmit": true,
