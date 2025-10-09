@@ -12,4 +12,9 @@ export default antfu({
       }],
     },
   },
+  stylistic: {
+    overrides: {
+      'style/no-tabs': ['warn', { allowIndentationTabs: true }],
+    },
+  },
 })
