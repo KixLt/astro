@@ -40,16 +40,6 @@ const timer = reactive({
   },
 })
 
-const parseImage = await Promise.all(
-  Object.keys(leftImages).map(async (key) => {
-    const mod = await leftImages[key]()
-    return {
-      name: key.split('/').pop(),
-      src: mod.default,
-    }
-  }),
-)
-
 onMounted(() => {
   timer.start()
 })
