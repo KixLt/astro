@@ -1,0 +1,214 @@
+---
+import cfg from 'blog.config'
+import Background from '@/components/Background/index.vue'
+
+const { base } = cfg.WebsiteSettings
+---
+
+<div class="page-content">
+  <Background client:load />
+
+  <section class="page-content__card">
+    <img
+      class="page-content__avatar"
+      src={`${base}${cfg.UserInfo.avatar}`}
+      alt={cfg.UserInfo.name}
+      width="112"
+      height="112"
+    />
+    <h1 class="page-content__name">{cfg.UserInfo.name}</h1>
+    <p class="page-content__intro">{cfg.UserInfo.introduction}</p>
+    <a class="page-content__enter" href={`${base}/blog`}>
+      <span class="page-content__enter-wave" aria-hidden="true">
+        <svg viewBox="0 0 150 32" preserveAspectRatio="none">
+          <path d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v48h-352z" />
+        </svg>
+        <svg viewBox="0 0 150 32" preserveAspectRatio="none">
+          <path d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v48h-352z" />
+        </svg>
+      </span>
+      <span class="page-content__enter-text">{cfg.WebsiteSettings.text.enterBlog}</span>
+    </a>
+  </section>
+</div>
+
+<style lang="scss">
+.page-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 5rem 1.5rem 2rem;
+  box-sizing: border-box;
+}
+
+.page-content__card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: min(26rem, 100%);
+  padding: 2.5rem 2rem;
+  border-radius: 1.5rem;
+  text-align: center;
+  color: #fff;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.page-content__avatar {
+  width: 7rem;
+  height: 7rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  animation: page-content-avatar-spin 12s linear infinite;
+}
+
+@keyframes page-content-avatar-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.page-content__name {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.page-content__intro {
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+.page-content__enter {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  padding: 0.65rem 2.25rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  font-weight: 600;
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: none;
+  text-decoration: none;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+
+  &:hover {
+    border-color: #6dd5ed;
+    box-shadow:
+      0 0 5px #6dd5ed,
+      0 0 10px #6dd5ed,
+      0 0 20px #6dd5ed;
+  }
+}
+
+.page-content__enter-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 200%;
+  height: 50%;
+  animation: page-content-enter-wave 4s linear infinite;
+  pointer-events: none;
+
+  svg {
+    width: 50%;
+    height: 100%;
+    fill: var(--background-default);
+    opacity: 0.25;
+  }
+}
+
+.page-content__enter-text {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes page-content-enter-wave {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+</style>
+
+<script>
+  let speedTimer: ReturnType<typeof setTimeout> | undefined
+  let speedRaf = 0
+
+  document.querySelector('.page-content__avatar')?.addEventListener('click', () => {
+    const waves = document.getElementById('header-waves')
+    if (!waves)
+      return
+
+    // 各层波浪的目标播放速率 = 原时长 / 加速后时长
+    const targets = [
+      { selector: '.wave-1', rate: 7 / 1.5 },
+      { selector: '.wave-2', rate: 10 / 2 },
+      { selector: '.wave-3', rate: 13 / 2.5 },
+      { selector: '.wave-4', rate: 20 / 3 },
+    ]
+
+    const animations = targets.flatMap(({ selector, rate }) =>
+      Array.from(waves.querySelectorAll(selector))
+        .map(el => el.getAnimations()[0])
+        .filter((anim): anim is Animation => Boolean(anim))
+        .map(anim => ({ anim, rate })),
+    )
+
+    if (animations.length === 0)
+      return
+
+    // 清除上一次未完成的加速/减速
+    if (speedTimer)
+      clearTimeout(speedTimer)
+    if (speedRaf)
+      cancelAnimationFrame(speedRaf)
+
+    // 立即进入加速状态,持续 2s
+    animations.forEach(({ anim, rate }) => {
+      anim.playbackRate = rate
+    })
+
+    speedTimer = setTimeout(() => {
+      // 1s 内线性减速回正常速度
+      const start = performance.now()
+      const duration = 1000
+      const fromRates = new Map(animations.map(({ anim }) => [anim, anim.playbackRate]))
+
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / duration)
+        animations.forEach(({ anim }) => {
+          const from = fromRates.get(anim) ?? 1
+          anim.playbackRate = from + (1 - from) * t
+        })
+
+        if (t < 1)
+          speedRaf = requestAnimationFrame(step)
+        else
+          speedRaf = 0
+      }
+
+      speedRaf = requestAnimationFrame(step)
+    }, 2000)
+  })
+</script>

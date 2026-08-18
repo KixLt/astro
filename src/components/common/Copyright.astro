@@ -1,0 +1,151 @@
+---
+import cfg from 'blog.config'
+
+export interface Props {
+  /** 文章标题 */
+  title?: string
+  /** 作者 */
+  author?: string
+  /** 发布日期 */
+  pubDate?: Date
+  /** 文章链接 */
+  postUrl?: string
+  /** 许可协议名称 */
+  name?: string
+  /** 许可协议链接 */
+  url?: string
+  /** 自定义版权文案(可选,显示在许可信息下方) */
+  text?: string
+}
+
+const { title, author, pubDate, postUrl, name, url, text } = Astro.props
+
+const visible = Boolean(title || author || name || text)
+const licenseName = name || 'CC BY-NC-SA 4.0'
+const licenseUrl = url || 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+const displayUrl = postUrl || Astro.url.href
+
+function formatDate(date?: Date) {
+  if (!date)
+    return ''
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+---
+
+{
+  visible && (
+    <div class="copyright">
+      {title && <div class="copyright__title">{title}</div>}
+      {displayUrl && (
+        <a class="copyright__url" href={displayUrl}>{displayUrl}</a>
+      )}
+
+      <div class="copyright__meta">
+        {author && (
+          <div class="copyright__field">
+            <span class="copyright__label">{cfg.WebsiteSettings.text.author}</span>
+            <span class="copyright__value">{author}</span>
+          </div>
+        )}
+        {pubDate && (
+          <div class="copyright__field">
+            <span class="copyright__label">{cfg.WebsiteSettings.text.publishedAt}</span>
+            <span class="copyright__value">{formatDate(pubDate)}</span>
+          </div>
+        )}
+        <div class="copyright__field">
+          <span class="copyright__label">{cfg.WebsiteSettings.text.license}</span>
+          <a
+            class="copyright__value copyright__value--link"
+            href={licenseUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >{licenseName}</a>
+        </div>
+      </div>
+
+      {text && <p class="copyright__text">{text}</p>}
+
+      <span class="copyright__watermark" aria-hidden="true">©</span>
+    </div>
+  )
+}
+
+<style lang="scss" scoped>
+.copyright {
+  position: relative;
+  overflow: hidden;
+  margin: 1rem 0;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  color: var(--text-default);
+  border: 1px solid var(--border-default);
+  background-color: var(--background-card);
+}
+
+.copyright__title {
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.copyright__url {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--primary);
+  font-size: 0.875rem;
+  word-break: break-all;
+}
+
+.copyright__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    gap: 2rem;
+  }
+}
+
+.copyright__label {
+  display: block;
+  font-size: 0.75rem;
+  color: light-dark(rgba(0, 0, 0, 0.35), rgba(255, 255, 255, 0.35));
+}
+
+.copyright__value {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  color: var(--text-default);
+
+  &--link {
+    color: var(--primary);
+  }
+}
+
+.copyright__text {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  opacity: 0.7;
+}
+
+.copyright__watermark {
+  position: absolute;
+  top: 50%;
+  right: 1.5rem;
+  transform: translateY(-50%);
+  font-size: 8rem;
+  font-weight: 700;
+  line-height: 1;
+  color: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.05));
+  pointer-events: none;
+  user-select: none;
+}
+</style>

@@ -1,0 +1,50 @@
+---
+export interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+---
+
+<div class:list={['wide-shell', className]}>
+  <aside class="wide-shell__side">
+    <slot name="side" />
+  </aside>
+  <div class="wide-shell__content">
+    <slot name="content" />
+  </div>
+</div>
+
+<style lang="scss">
+  .wide-shell {
+    display: grid;
+    grid-template-columns: var(--layout-sidebar-width) minmax(0, 1fr);
+    gap: 1rem;
+    width: calc(100vw - 4rem);
+    max-width: calc(var(--layout-page-width) - 4rem);
+    margin: 0 auto;
+    padding: 1rem;
+    align-items: start;
+
+    &__side {
+      position: sticky;
+      top: 5rem;
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      // 平板:收窄侧栏,给内容更多宽度
+      grid-template-columns: 14rem minmax(0, 1fr);
+    }
+
+    @media (max-width: 767px) {
+      grid-template-columns: 1fr;
+      width: 100%;
+      max-width: none;
+      padding: 1rem;
+
+      &__side {
+        position: static;
+      }
+    }
+  }
+</style>

@@ -8,8 +8,7 @@ export async function loadModules<T = string>(
 ): Promise<{ name: string, src: T }[]> {
   const result = await Promise.all(
     Object.entries(modules).map(async ([key, loader]) => {
-      const mod = (await loader()) as { default: T }
-      console.log(`output->mod`, mod)
+      const mod = await loader()
       return {
         name: key.split('/').pop()!,
         src: mod.src,

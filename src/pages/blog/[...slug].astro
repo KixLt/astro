@@ -1,21 +1,182 @@
 ---
-import { type CollectionEntry, getCollection } from 'astro:content'
-import { render } from 'astro:content'
-import BlogPost from '../../layouts/BlogPost.astro'
+import type { CollectionEntry } from 'astro:content'
+import type { PostMeta } from '@/types/post.ts'
+import { getCollection, render } from 'astro:content'
+import cfg from 'blog.config'
+import CommentPlaceholder from '@/components/common/CommentPlaceholder.astro'
+import Copyright from '@/components/common/Copyright.astro'
+import GridShell from '@/components/layout/GridShell.astro'
+import PageShell from '@/components/layout/PageShell.astro'
+import ProfileCard from '@/components/page/left/ProfileCard.astro'
+import TagList from '@/components/page/left/TagList.vue'
+import Toc from '@/components/page/left/Toc.vue'
+import Breadcrumb from '@/components/page/middle/Breadcrumb.astro'
+import CategoryList from '@/components/page/right/CategoryList.vue'
+import PrevNext from '@/components/page/right/PrevNext.astro'
+import { getCoverImage } from '@/utils/cover.ts'
 
 export async function getStaticPaths() {
-	const posts = await getCollection('blog')
-	return posts.map(post => ({
-		params: { slug: post.id },
-		props: post,
-	}))
+  const posts = await getCollection('blog')
+  return posts.map(post => ({ params: { slug: post.id } }))
 }
-type Props = CollectionEntry<'blog'>
 
-const post = Astro.props
-const { Content } = await render(post);
+const { base } = cfg.WebsiteSettings
+const { slug } = Astro.params
+
+const allPosts = (await getCollection('blog'))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+
+const entry = allPosts.find(post => post.id === slug)
+if (!entry)
+  throw new Error(`Blog post not found: ${slug}`)
+
+const { Content, headings } = await render(entry)
+const post = toPostMeta(entry)
+
+const index = allPosts.findIndex(item => item.id === slug)
+// 按 pubDate 降序:前一篇为更新的,后一篇为更旧的
+const prev = index > 0 ? toPostMeta(allPosts[index - 1]) : undefined
+const next = index < allPosts.length - 1 ? toPostMeta(allPosts[index + 1]) : undefined
+
+const tagCounts = new Map<string, number>()
+const categoryCounts = new Map<string, number>()
+for (const item of allPosts) {
+  for (const tag of item.data.tags)
+    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)
+
+  if (item.data.category)
+    categoryCounts.set(item.data.category, (categoryCounts.get(item.data.category) ?? 0) + 1)
+}
+
+const tags = [...tagCounts.entries()]
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => a.name.localeCompare(b.name))
+const categories = [...categoryCounts.entries()]
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => a.name.localeCompare(b.name))
+
+const dateText = entry.data.pubDate.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+})
+
+function toPostMeta(item: CollectionEntry<'blog'>): PostMeta {
+  const chars = (item.body ?? '').replace(/\s+/g, '').length
+  return {
+    slug: item.id,
+    title: item.data.title,
+    description: item.data.description,
+    date: item.data.pubDate.toISOString(),
+    updatedDate: item.data.updatedDate?.toISOString(),
+    tags: item.data.tags,
+    category: item.data.category,
+    cover: getCoverImage(item),
+    minutes: Math.max(1, Math.ceil(chars / 400)),
+    words: chars,
+  }
+}
 ---
 
-<BlogPost {...post.data}>
-	<Content />
-</BlogPost>
+<PageShell title={entry.data.title}>
+  <GridShell>
+    <Fragment slot="left">
+      <ProfileCard
+        name={cfg.UserInfo.name}
+        introduction={cfg.UserInfo.introduction}
+        avatar={cfg.UserInfo.avatar}
+        links={cfg.UserInfo.link}
+        base={base}
+      />
+      <TagList client:load tags={tags} />
+    </Fragment>
+    <Fragment slot="middle">
+      <Breadcrumb
+        base={base}
+        items={[
+          { text: cfg.WebsiteSettings.text.blog, href: `${base}/blog` },
+          { text: entry.data.title },
+        ]}
+      />
+      <article class="post">
+        <h1 class="post__title">{entry.data.title}</h1>
+        <div class="post__meta">
+          <time datetime={entry.data.pubDate.toISOString()}>{dateText}</time>
+          {
+            entry.data.category && (
+              <a class="post__category" href={`${base}/blog?category=${entry.data.category}`}>
+                {entry.data.category}
+              </a>
+            )
+          }
+          {
+            entry.data.tags.map(tag => (
+              <a class="post__tag" href={`${base}/blog?tag=${tag}`}>#{tag}</a>
+            ))
+          }
+        </div>
+        <div class="post__reading">
+          <span>{cfg.WebsiteSettings.text.readingTime.replace('{minutes}', String(post.minutes))}</span>
+          <span>{cfg.WebsiteSettings.text.wordCount.replace('{words}', String(post.words))}</span>
+        </div>
+        <div class="post__content prose">
+          <Content />
+        </div>
+        <Copyright
+          title={entry.data.title}
+          author={cfg.UserInfo.name}
+          pubDate={entry.data.pubDate}
+          postUrl={Astro.url.href}
+          name={cfg.WebsiteSettings.copyright?.name}
+          url={cfg.WebsiteSettings.copyright?.url}
+          text={cfg.WebsiteSettings.copyright?.text}
+        />
+        <CommentPlaceholder slug={entry.id} />
+        <PrevNext prev={prev} next={next} base={base} />
+      </article>
+    </Fragment>
+    <Fragment slot="right">
+      <CategoryList client:load categories={categories} isDetail={true} base={base} />
+      <Toc client:load headings={headings} />
+    </Fragment>
+  </GridShell>
+</PageShell>
+
+<style lang="scss">
+  .post {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: var(--background-default);
+    border-radius: var(--radius-large);
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.2);
+
+    &__title {
+      font-size: 1.8rem;
+      line-height: 1.4;
+    }
+
+    &__meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--tips-default);
+    }
+
+    &__reading {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-default);
+      opacity: 0.7;
+    }
+
+    &__content {
+      margin-top: 0.5rem;
+      overflow-wrap: break-word;
+    }
+  }
+</style>

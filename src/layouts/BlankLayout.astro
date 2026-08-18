@@ -1,0 +1,67 @@
+---
+import cfg from 'blog.config'
+import HeadMeta from '@/components/layout/HeadMeta.astro'
+import '@/styles/global.scss'
+
+export interface Props {
+  title?: string
+  description?: string
+}
+
+const { title, description } = Astro.props
+const { base } = cfg.WebsiteSettings
+---
+
+<html lang="zh" data-theme="auto">
+  <head>
+    <HeadMeta title={title} description={description} />
+    <link rel="icon" href={`${base}/favicon.svg`} />
+    <script is:inline>
+      (() => {
+        const theme = localStorage.getItem('theme')
+        if (theme)
+          document.documentElement.dataset.theme = theme
+      })()
+    </script>
+  </head>
+  <body>
+    <slot />
+    <style
+      is:global
+      define:vars={{
+        lightBg: cfg.color.light.backgroundDefault,
+        darkBg: cfg.color.dark.backgroundDefault,
+        lightCard: cfg.color.light.cardDefault,
+        darkCard: cfg.color.dark.cardDefault,
+        lightBorder: cfg.color.light.borderDefault,
+        darkBorder: cfg.color.dark.borderDefault,
+        lightBgActive: cfg.color.light.backgroundActiveDefault,
+        darkBgActive: cfg.color.dark.backgroundActiveDefault,
+        lightText: cfg.color.light.textDefault,
+        darkText: cfg.color.dark.textDefault,
+        lightTips: cfg.color.light.tipsDefault,
+        darkTips: cfg.color.dark.tipsDefault,
+        lightPrimary: cfg.color.light.primary ?? cfg.color.light.tipsDefault,
+        darkPrimary: cfg.color.dark.primary ?? cfg.color.dark.tipsDefault,
+      }}
+    >
+      :root {
+        color-scheme: light dark;
+        --background-default: light-dark(var(--lightBg), var(--darkBg));
+        --background-card: light-dark(var(--lightCard), var(--darkCard));
+        --border-default: light-dark(var(--lightBorder), var(--darkBorder));
+        --background-active: light-dark(var(--lightBgActive), var(--darkBgActive));
+        --text-default: light-dark(var(--lightText), var(--darkText));
+        --tips-default: light-dark(var(--lightTips), var(--darkTips));
+        --primary: light-dark(var(--lightPrimary), var(--darkPrimary));
+        --radius-large: 1rem;
+      }
+      :root[data-theme='light'] {
+        color-scheme: light;
+      }
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+      }
+    </style>
+  </body>
+</html>

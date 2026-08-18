@@ -1,0 +1,79 @@
+---
+import cfg from 'blog.config'
+
+export interface Props {
+  /** 占位提示文案 */
+  text?: string
+  /** 文章 slug,用于 Twikoo 按文章区分评论 */
+  slug?: string
+}
+
+const { text = cfg.WebsiteSettings.text.commentPlaceholder, slug } = Astro.props
+const comment = cfg.WebsiteSettings.comment
+const enabled = Boolean(comment?.enable && comment?.envId)
+const envId = comment?.envId ?? ''
+const region = comment?.region ?? 'ap-shanghai'
+const lang = comment?.lang ?? 'zh-CN'
+const path = slug ? `${cfg.WebsiteSettings.base}/blog/${slug}` : Astro.url.pathname
+---
+
+{
+  enabled
+    ? (
+        <div id="twikoo-comment" class="comment-twikoo"></div>
+        <script is:inline define:vars={{ envId, region, lang, path }}>
+          (() => {
+            if (!window.twikoo) {
+              const script = document.createElement('script')
+              script.src = 'https://cdn.staticfile.org/twikoo/1.6.39/twikoo.all.min.js'
+              script.onload = initTwikoo
+              document.head.appendChild(script)
+            }
+            else {
+              initTwikoo()
+            }
+
+            function initTwikoo() {
+              const el = document.getElementById('twikoo-comment')
+              if (!el || el.dataset.inited === 'true')
+                return
+              el.dataset.inited = 'true'
+              window.twikoo.init({
+                envId,
+                region,
+                lang,
+                el: '#twikoo-comment',
+                path,
+              })
+            }
+          })()
+        </script>
+      )
+    : (
+        <div></div>
+      )
+}
+
+<style lang="scss" scoped>
+  .comment-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 10rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: var(--radius-large);
+    color: var(--tips-default);
+    border: 1px solid var(--border-default);
+    background-color: var(--background-card);
+    opacity: 0.8;
+  }
+
+  .comment-placeholder__text {
+    font-size: 0.9375rem;
+  }
+
+  .comment-twikoo {
+    margin: 1rem 0;
+  }
+</style>

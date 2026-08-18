@@ -1,9 +1,10 @@
 ---
 export interface Props {
-  content: string[];
+  /** 页脚 HTML 内容行(原样插入,支持 HTML) */
+  content: string[]
 }
 
-const { content } = Astro.props;
+const { content } = Astro.props
 ---
 
 <footer set:html={content.map((val: any) => val)} />
@@ -17,7 +18,7 @@ const { content } = Astro.props;
     justify-content: center;
     align-items: center;
     gap: 0.3rem;
-    min-height: 9rem;
+    min-height: 6rem;
     color: var(--text-default);
     background-color: var(--background-default);
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16),

@@ -1,11 +1,11 @@
 import _ from 'lodash'
 
-// const astroCfg = {}
 // 外链配置
 interface BasicLinkConfig {
-  sitename?: string,
-  link?: string,  
-  class: string
+  sitename?: string
+  link?: string
+  /** 图标名,对应 components/icons/Icon.astro 的 name */
+  icon?: string
 }
 
 // 个人信息配置
@@ -13,78 +13,29 @@ interface BasicPersonalConfig {
   /** 你的名字，用于资料卡名字展示 */
   name: string
   /** 你的简介 */
-  introduction?: string,
+  introduction?: string
   /** 头像路径，从public目录开始查找，如：`/avatar/avatar2.jpg` */
-  avatar?: string,
+  avatar?: string
   /** 你的网站外链，如 GitHub，会展示在资料卡 */
   link: BasicLinkConfig[]
 }
 
-// header 通用配置
-interface BasicHeaderConfig {
-  /** 当前网站标题，会用于 head 部分设置网站标题与大标题 */
-  title?: string
-  /** 隐藏 header，默认 `false` */
-  hidden?: boolean
-  /** 保持背景颜色，即取消透明模式，默认 `true` */
-  keepBackgroundColor?: boolean
-  /** 保持 header 展开，默认 `true` */
-  keepOpen?: boolean
-}
-
-// 单个页面的 header 配置
-type PageHeaderConfig = BasicHeaderConfig
-
-export interface BasicBackgroundConfig {
-  /** 
-   * 背景类型，`photo` 为图片；`fade` 为渐变色，但只要是 `background-image` 可接受的参数即可；`purity` 为纯色
-   */
-  type: 'photo' | 'fade' | 'purity'
-  /**
-   * 填入内容，根据 `type` 选项决定
-   * - `photo`，则填入图片路径，**将图片放在 public 文件夹下，并将 public 作为根路径来查找图片**
-   * - `fade` 则填入 `background-image` 可接受参数，比如 `linear-gradient()`
-   * - `purify` 则填入颜色代码，如 `#eee`
-   */
-  content: string
-  /**
-   * @deprecated 将会在新版本中启用
-   */
-  jsPlugin: boolean
-  /** 为背景提供一个毛玻璃效果，默认 `false`，详见：[MDN filter](https://developer.mozilla.org/zh-CN/docs/Web/CSS/filter) */
-  filter: boolean
-  /** 
-   * 为背景提供一个暗色效果，默认 `false`，详见：[MDN background-color](https://developer.mozilla.org/zh-CN/docs/Web/CSS/background-color)
-   * 
-   * 颜色不透明度 0.3
-   */
-  mask: boolean
-  /**
-   * 暗色模式下启用背景面罩，用于降低背景亮度，默认 `false`
-   */
-  useMaskOnDarkMode: boolean
-}
-
-// footer 配置
-interface BasicFooterConfig {
-  /** 隐藏 footer，默认 `false` */
-  hidden?: boolean
-  /** 底部 footer，默认是 `Copyright © {当前年份}`，会作为 HTML 插入到页尾 */
-  content?: string[]
-}
-
-type PageFooterConfig = BasicFooterConfig
-
 // 底色配置
 interface BasicThemeColorConfig {
-  /** 背景默认颜色，默认：`#f2f5f8`，夜间默认：`#222` */
+  /** 背景默认颜色，默认：`#f5f5f7`，夜间默认：`#121212` */
   backgroundDefault: string
+  /** 卡片等组件表面的背景颜色，默认：`#fff`，夜间默认：`#1d1d1f` */
+  cardDefault: string
+  /** 卡片等组件的边框颜色，默认：`rgba(0, 0, 0, 0.08)`，夜间默认：`rgba(255, 255, 255, 0.08)` */
+  borderDefault: string
   /** 选择框激活 / 鼠标悬浮时的背景颜色，默认：`#ddd`，夜间默认：`#444` */
   backgroundActiveDefault: string
   /** 文字默认颜色，默认：`#000`，夜间默认：`#fff` */
   textDefault: string
   /** 文字按钮激活 / 鼠标悬浮时默认颜色，默认：`#3F5EFB`，夜间默认：`#919edf` */
   tipsDefault: string
+  /** 主色(强调色)，用于标题竖条、hover 高亮等，默认取 tipsDefault，可单独配置 */
+  primary?: string
 }
 
 type LightThemeColorConfig = BasicThemeColorConfig
@@ -93,39 +44,58 @@ type DarkThemeColorConfig = BasicThemeColorConfig
 
 // 页面配置
 export interface BasicPageConfig {
-  header?: PageHeaderConfig
-  background?: Partial<BasicBackgroundConfig>
-  footer?: PageFooterConfig
-  /** 
-   * 给予页面中心部分最小高度，默认为 `content`
-   * 
-   * - 'content' 会将内容控制在 `header` 与 `footer` 之间
-   * - 'fill' 将会以百分百宽高填充整个可见区域，并隐藏屏幕滚动条
-   * - 'unset' 将不对高度做任何处理，保留滚动条
-   */
-  setMinHeight?: 'content' | 'fill' | 'unset',
+  /** Banner 配置,背景图列表 */
+  banner?: {
+    images?: string[]
+  }
+  /** footer 配置 */
+  footer: {
+    /** 底部 footer，默认是 `Copyright © {当前年份}`，会作为 HTML 插入到页尾 */
+    content: string[]
+  }
 }
 
 interface BlogPageConfig extends BasicPageConfig {
-  /** 博客页中每页展示的文章数量，默认5 */
+  /** 博客页中每页展示的文章数量，默认10 */
   PageArticleCount?: number
 }
 
-interface CollectPageConfig extends BasicPageConfig {
-  /** 集合页中每页展示的文章数量，默认10 */
-  PageArticleCount?: number
-}
-
-interface FriendItem {
-  name: string
-  link: string
-  avatar?: string
-  description?: string
-}
-
-interface FriendsPageConfig extends BasicPageConfig {
-  /** 友链列表 */
-  FriendList?: FriendItem[]
+// 页面文案配置
+interface TextConfig {
+  home: string
+  blog: string
+  archive: string
+  about: string
+  links: string
+  enterBlog: string
+  searchPlaceholder: string
+  searchHint: string
+  displaySettings: string
+  themeColor: string
+  resetThemeColor: string
+  toggleTheme: string
+  menu: string
+  navMenu: string
+  breadcrumb: string
+  notFoundTitle: string
+  notFoundTip: string
+  backHome: string
+  previousPage: string
+  nextPage: string
+  readingTime: string
+  wordCount: string
+  viewPost: string
+  enterPost: string
+  commentPlaceholder: string
+  emptyPosts: string
+  emptyTags: string
+  emptyCategories: string
+  toc: string
+  author: string
+  publishedAt: string
+  license: string
+  scrollDown: string
+  archiveCount: string
 }
 
 // 网站配置
@@ -134,18 +104,16 @@ interface BasicWebsiteConfig {
   title: string
   /** 网站描述 */
   description: string
-  /** 
+  /**
    * 网站线上链接，**请设置成 `astro.config.mjs` 下的 `site` 值**
    * @example
    * // blog.config.ts
    * export default defineConfig({
    *    site: '', // 确保此处的值与 astro.config.mjs 的值相同
    * })
-   *  */
+   */
   site: string
-  /** 为博客添加一个自定义主页，默认为 false */
-  useIndex?: boolean
-  /** 
+  /**
    * 网站二级路径，**请设置成 `astro.config.mjs` 下的 `base` 值**
    * @example
    * // blog.config.ts
@@ -155,9 +123,31 @@ interface BasicWebsiteConfig {
    * @see https://docs.astro.build/zh-cn/guides/deploy/github/#如何部署 参考设置 base 属性
    */
   base?: string
+  /** 页面文案统一配置 */
+  text: TextConfig
+  /** 版权声明 */
+  copyright?: {
+    /** 自定义版权文案 */
+    text?: string
+    /** 许可协议名称,如 CC BY-NC-SA 4.0 */
+    name?: string
+    /** 许可协议链接 */
+    url?: string
+  }
+  /** Twikoo 评论配置 */
+  comment?: {
+    /** 是否启用评论 */
+    enable?: boolean
+    /** Twikoo 环境 ID(腾讯云环境 ID 或 Vercel URL) */
+    envId?: string
+    /** 腾讯云区域,默认为 ap-shanghai */
+    region?: string
+    /** 评论语言 */
+    lang?: string
+  }
 }
 
-export type PageList = 'index' | 'blog' | 'tags' | 'about' | 'friends' | 'posts' | 'custom' | 'collect'
+export type PageList = 'blog'
 
 interface BlogConfig extends Record<any, any> {
   PageDefaultSettings: BasicPageConfig
@@ -166,97 +156,96 @@ interface BlogConfig extends Record<any, any> {
     light: LightThemeColorConfig
     dark: DarkThemeColorConfig
   }
-  pages: Partial<Record<PageList, BasicPageConfig>> & Partial<{
-    'blog': BlogPageConfig
-    'collect': CollectPageConfig
-    'friends': FriendsPageConfig
-  }>
+  pages: Partial<Record<PageList, BlogPageConfig>>
   UserInfo: BasicPersonalConfig
 }
 
 export default function defineBlogConfig(config: Partial<BlogConfig>): BlogConfig {
   const _DEFAULT_CONFIG_: BlogConfig = {
     PageDefaultSettings: {
-      setMinHeight: 'content',
-      header: {
-        title: '',
-        hidden: false,
-        keepBackgroundColor: true,
-        keepOpen: true
-      },
-      background: {
-        filter: false,
-        mask: false,
-        type: "purity",
-        content: "#ddd"
+      banner: {
+        images: ['/full/13.jpg', '/full/bgr.jpg', '/full/6.webp'],
       },
       footer: {
-        hidden: false,
         content: [
-          `<div>Copyright © ${(new Date()).getFullYear()}</div>`
-        ]
-      }
+          `<div>Copyright © ${(new Date()).getFullYear()}</div>`,
+        ],
+      },
     },
     WebsiteSettings: {
       title: `Shiina's Blog`,
       description: '',
-      site: "",
-      useIndex: false,
-      base: "",
+      site: '',
+      base: '',
+      text: {
+        home: '首页',
+        blog: '博客',
+        archive: '归档',
+        about: '关于我',
+        links: '链接',
+        enterBlog: '进入博客',
+        searchPlaceholder: '搜索…',
+        searchHint: '输入关键词实时过滤文章',
+        displaySettings: '显示设置',
+        themeColor: '主题色',
+        resetThemeColor: '重置主题色',
+        toggleTheme: '切换明暗主题',
+        menu: '菜单',
+        navMenu: '导航菜单',
+        breadcrumb: '面包屑',
+        notFoundTitle: '404',
+        notFoundTip: '抱歉,你访问的页面不存在或已被移除。',
+        backHome: '回到首页',
+        previousPage: '上一篇',
+        nextPage: '下一篇',
+        readingTime: '约 {minutes} 分钟',
+        wordCount: '{words} 字',
+        viewPost: '查看',
+        enterPost: '进入',
+        commentPlaceholder: '评论区(后续开发)',
+        emptyPosts: '无匹配文章',
+        emptyTags: '暂无标签',
+        emptyCategories: '暂无分类',
+        toc: '目录',
+        author: '作者',
+        publishedAt: '发布于',
+        license: '许可',
+        scrollDown: '向下滚动',
+        archiveCount: '{count} 篇',
+      },
     },
     UserInfo: {
       name: 'Shiinafan',
       introduction: '有钱终成眷属，没钱亲眼目睹',
       avatar: '/source/avatar.jpg',
-      link: []
+      link: [],
     },
     color: {
       light: {
-        backgroundDefault: '#fcfcfc',
-        backgroundActiveDefault: '#ddd',
+        backgroundDefault: '#f5f5f7',
+        cardDefault: '#ffffff',
+        borderDefault: 'rgba(0, 0, 0, 0.08)',
+        backgroundActiveDefault: '#e4e4e8',
         textDefault: '#222',
-        tipsDefault: '#3F5EFB'
+        tipsDefault: '#3F5EFB',
+        primary: '#3F5EFB',
       },
       dark: {
         backgroundDefault: '#121212',
-        backgroundActiveDefault: '#444',
+        cardDefault: '#1d1d1f',
+        borderDefault: 'rgba(255, 255, 255, 0.08)',
+        backgroundActiveDefault: '#2e2e32',
         textDefault: '#fff',
-        tipsDefault: '#919edf'
+        tipsDefault: '#919edf',
+        primary: '#919edf',
       },
     },
     pages: {
-      'index': {
-        header: {
-          title: '主页'
-        }
+      blog: {
+        PageArticleCount: 10,
+        footer: { content: [''] },
       },
-      'blog': {
-        header: {
-          title: '博客'
-        },
-        PageArticleCount: 5
-      },
-      'about': {},
-      'posts': {},
-      'custom': {},
-      'collect': {
-        header: {
-          title: '集合'
-        },
-        PageArticleCount: 10
-      },
-      'friends': {
-        header: {
-          title: '友链'
-        },
-        FriendList: []
-      },
-      'tags': {
-        header: {
-          title: '标签'
-        }
-      }
-    }
+    },
   }
 
   const C = _.defaultsDeep(config, _DEFAULT_CONFIG_)

@@ -1,105 +1,87 @@
 ---
-import BackToTop from "./components/BackToTop.astro";
+import BackToTop from './components/BackToTop.astro'
 
-type ComponentType = "BackToTop" | "Toc";
+type ComponentType = 'BackToTop'
 
 interface Props {
-  class?: string;
-  components?: ComponentType[];
+  components?: ComponentType[]
 }
-const { class: className, components } = Astro.props;
+const { components } = Astro.props;
 ---
 
-<div class="corner" id="Corner" data-astro-class={className}>
+<div class="corner" id="Corner">
   {
-    components?.map((v) => (
-      <div class="list_item">
-        {(() => {
+    components?.map(v => (
+        (() => {
           switch (v) {
-            case "BackToTop":
-              return <BackToTop />;
-            // case "Toc":
-            //   return <Toc />;
+            case 'BackToTop':
+              return <BackToTop />
             default:
-              break;
+              break
           }
-        })()}
-      </div>
+        })()
     ))
   }
 </div>
-<!-- <div class="corner_menu_wrapper">
-  {
-    components?.map((v) => {
-      switch (v) {
-        case "Toc":
-          return <TocList />;
-        default:
-          break;
-      }
-    })
-  }
-</div> -->
 
 <script>
-  const observerOptions: IntersectionObserverInit = {
-    // Negative top margin accounts for `scroll-margin`.
-    // Negative bottom margin means heading needs to be towards top of viewport to trigger intersection.
-    rootMargin: "100px 0px 0px 0px",
-  };
+const observerOptions: IntersectionObserverInit = {
+  // Extend the root 100px upward: the menu appears only after the
+  // scroll mark at the top of the page has been scrolled past.
+  rootMargin: '-100px 0px 0px 0px',
+}
 
-  const headingsObserver = new IntersectionObserver((e) => {
-    let isShow = true;
-    if (e[0].intersectionRatio <= 0.1) isShow = false;
+const corner = document.getElementById('Corner')
+const scrollMark = document.querySelector('.banner__content')
+const headingsObserver = new IntersectionObserver(([entry]) => {
+  const isAtTop = entry.isIntersecting
+  corner?.classList.toggle('show', !isAtTop)
+}, observerOptions)
 
-    document.getElementById("Corner")?.setAttribute(
-      "class",
-      `corner
-        ${document.getElementById("Corner")?.getAttribute("data-astro-class")}
-        ${isShow ? "" : " show"}`
-    );
-  }, observerOptions);
-
-  // Observe all the headings in the main page content.
-  headingsObserver.observe(
-    document.querySelector("#ScrollMark") || document.body
-  );
+// Observe the scroll mark rendered at the top of the page.
+if (scrollMark)
+  headingsObserver.observe(scrollMark)
 </script>
 
 <style lang="scss" is:global>
   #Corner {
-    z-index: 5000;
+    color: var(--tips-default);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: fixed;
-    right: 1rem;
-    bottom: 0.4rem;
-    width: 2.2rem;
-    transform: translateX(150%);
-    transition: transform 0.3s;
-
-    .list_item {
-      width: 100%;
-      height: 1.8rem;
-      margin: 0.4rem 0;
-      background-color: var(--background-default);
-      border-radius: 0.2rem;
-      box-shadow: 0 0 5px rgba(62, 62, 62, 0.5);
-      transition: color 0.3s;
-      cursor: pointer;
-
-      &:hover {
-        color: var(--tips-default);
-      }
-    }
-
-    &.show {
-      transform: translateX(0);
-    }
-  }
-  .corner_menu_wrapper {
-    position: fixed;
-    top: 0;
-    right: 0;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 9999;
+    opacity: 0;
     width: 0;
-    height: 100%;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 0.8rem;
+    transform: scale(0.5);
+    transition:
+      all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      &.show {
+        width: 3rem;
+        height: 3rem;
+        opacity: 1;
+        transform: scale(1);
+        padding: 0.25rem;
+        border-width: 1px;
+        pointer-events: auto;
+      }
+      &:hover{
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+      }
+  }
+  #Corner svg {
+    opacity: 1;
+    transition: opacity 0.2s ease 0.1s;
+  }
+  #Corner:not(.show) svg {
+    opacity: 0;
+    transition: opacity 0.1s ease;
   }
 </style>

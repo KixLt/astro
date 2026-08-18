@@ -1,0 +1,31 @@
+---
+import cfg from 'blog.config'
+
+export interface Props {
+  /** 页面标题,会与网站标题拼接 */
+  title?: string
+  /** 页面描述,覆盖默认描述 */
+  description?: string
+}
+
+const { title, description } = Astro.props
+
+const {
+  WebsiteSettings: { title: siteTitle, description: siteDescription, site },
+} = cfg
+
+const fullTitle = title ? `${title} - ${siteTitle}` : siteTitle
+---
+
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>{fullTitle}</title>
+<meta name="title" content={siteTitle} />
+<meta name="description" content={description ?? `${fullTitle} ${siteDescription}`} />
+
+<meta property="og:type" content="website" />
+<meta property="og:url" content={site} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description ?? siteDescription} />

@@ -1,0 +1,132 @@
+---
+import cfg from 'blog.config'
+import Icon from '@/components/icons/Icon.astro'
+
+export interface Props {
+  /** 站点 base 前缀,如 '/astro' */
+  base: string
+  /** 面包屑项(不含"首页",首页以主页图标渲染并指向 base+'/blog') */
+  items: { text: string, href?: string }[]
+}
+
+const { base, items } = Astro.props
+---
+
+<nav class="breadcrumb" aria-label={cfg.WebsiteSettings.text.breadcrumb}>
+  <a class="breadcrumb__home" href={`${base}/blog`} aria-label={cfg.WebsiteSettings.text.home}>
+    <Icon name="home" size={16} />
+  </a>
+
+  {
+    items.map(item => (
+      <span class="breadcrumb__seg">
+        <Icon class="breadcrumb__sep" name="chevron-right" size={14} />
+        {
+          item.href
+            ? <a class="breadcrumb__item" href={item.href}>{item.text}</a>
+            : <span class="breadcrumb__item breadcrumb__item--current">{item.text}</span>
+        }
+      </span>
+    ))
+  }
+</nav>
+
+<style lang="scss" scoped>
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  overflow-x: auto;
+  border-radius: var(--radius-large);
+  color: var(--text-default);
+  border: 1px solid var(--border-default);
+  background-color: var(--background-card);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16),
+    0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.breadcrumb__home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 9999px;
+  color: var(--primary);
+  border: 1px solid light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.18));
+  background: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.1));
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  transition:
+    color 0.2s,
+    background-color 0.2s,
+    border-color 0.2s;
+
+  &:hover {
+    color: #fff;
+    background: var(--primary);
+    border-color: transparent;
+  }
+}
+
+.breadcrumb__seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.breadcrumb__sep {
+  color: var(--tips-default);
+  opacity: 0.5;
+}
+
+.breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text-default);
+  border: 1px solid light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.18));
+  background: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.1));
+  border: 1px solid color-mix(in srgb, var(--text-default) 12%, transparent);
+  background: color-mix(in srgb, var(--text-default) 6%, transparent);
+  transition:
+    color 0.2s,
+    background-color 0.2s,
+    border-color 0.2s;
+
+  &:hover {
+    color: var(--primary);
+    background: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.14));
+    border-color: light-dark(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.28));
+    background: color-mix(in srgb, var(--primary) 15%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 25%, transparent);
+  }
+
+  &--current {
+    color: #fff;
+    background: var(--primary);
+    border-color: transparent;
+    font-weight: 600;
+
+    &:hover {
+      color: #fff;
+      background: var(--primary);
+      opacity: 0.92;
+    }
+  }
+}
+</style>

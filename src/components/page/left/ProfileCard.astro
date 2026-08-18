@@ -1,0 +1,116 @@
+---
+import Icon from '@/components/icons/Icon.astro'
+
+export interface Props {
+  /** 姓名 */
+  name: string
+  /** 简介 */
+  introduction?: string
+  /** 头像路径(public 根相对路径,如 '/avatar/avatar.jpg') */
+  avatar?: string
+  /** 外链列表 */
+  links: { sitename?: string, link?: string, icon?: string }[]
+  /** 站点 base 前缀,如 '/astro' */
+  base: string
+}
+
+const { name, introduction, avatar, links, base } = Astro.props
+---
+
+<div class="profile-card">
+  {
+    avatar && (
+      <img
+        class="profile-card__avatar"
+        src={`${base}${avatar}`}
+        alt={name}
+        width="96"
+        height="96"
+        loading="lazy"
+      />
+    )
+  }
+
+  <div class="profile-card__name">{name}</div>
+
+  {
+    introduction && <p class="profile-card__intro">{introduction}</p>
+  }
+
+  {
+    links.length > 0 && (
+      <div class="profile-card__links">
+        {
+          links.map(link => (
+            <a
+              class="profile-card__link"
+              href={link.link}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {link.icon && <Icon name={link.icon} size={16} />}
+              <span>{link.sitename}</span>
+            </a>
+          ))
+        }
+      </div>
+    )
+  }
+</div>
+
+<style lang="scss" scoped>
+  .profile-card {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    padding: 1.5rem 1rem;
+    border-radius: var(--radius-large);
+    color: var(--text-default);
+    border: 1px solid var(--border-default);
+    background-color: var(--background-card);
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16),
+      0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  .profile-card__avatar {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .profile-card__name {
+    margin-top: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .profile-card__intro {
+    margin: 0.4rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--tips-default);
+    text-align: center;
+  }
+
+  .profile-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .profile-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--tips-default);
+    }
+  }
+</style>

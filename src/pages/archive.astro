@@ -1,0 +1,62 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import type { PostMeta } from '@/types/post.ts'
+import { getCollection } from 'astro:content'
+import cfg from 'blog.config'
+import PageShell from '@/components/layout/PageShell.astro'
+import WideShell from '@/components/layout/WideShell.astro'
+import ProfileCard from '@/components/page/left/ProfileCard.astro'
+import Timeline from '@/components/page/middle/Timeline.vue'
+import { getCoverImage } from '@/utils/cover.ts'
+
+const { base } = cfg.WebsiteSettings
+
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .map(entry => toPostMeta(entry))
+
+const groupMap = new Map<number, PostMeta[]>()
+for (const post of posts) {
+  const year = new Date(post.date).getFullYear()
+  const list = groupMap.get(year) ?? []
+  list.push(post)
+  groupMap.set(year, list)
+}
+
+const groups = [...groupMap.entries()]
+  .map(([year, yearPosts]) => ({ year, posts: yearPosts }))
+  .sort((a, b) => b.year - a.year)
+
+function toPostMeta(entry: CollectionEntry<'blog'>): PostMeta {
+  const chars = (entry.body ?? '').replace(/\s+/g, '').length
+  return {
+    slug: entry.id,
+    title: entry.data.title,
+    description: entry.data.description,
+    date: entry.data.pubDate.toISOString(),
+    updatedDate: entry.data.updatedDate?.toISOString(),
+    tags: entry.data.tags,
+    category: entry.data.category,
+    cover: getCoverImage(entry),
+    minutes: Math.max(1, Math.ceil(chars / 400)),
+    words: chars,
+  }
+}
+---
+
+<PageShell title={cfg.WebsiteSettings.text.archive}>
+  <WideShell>
+    <Fragment slot="side">
+      <ProfileCard
+        name={cfg.UserInfo.name}
+        introduction={cfg.UserInfo.introduction}
+        avatar={cfg.UserInfo.avatar}
+        links={cfg.UserInfo.link}
+        base={base}
+      />
+    </Fragment>
+    <Fragment slot="content">
+      <Timeline client:load groups={groups} base={base} />
+    </Fragment>
+  </WideShell>
+</PageShell>

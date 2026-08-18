@@ -4,13 +4,18 @@
     // Enable top-level await, and other modern ESM features.
     "target": "ESNext",
     "jsx": "preserve",
-    "baseUrl": "./",
     "module": "esnext",
-    // Enable node-style module resolution, for things like npm package imports.
-    "moduleResolution": "node",
+    // Modern bundler-style resolution (same as astro/tsconfigs/base).
+    // baseUrl 已移除：paths 条目现在相对 tsconfig.json 所在目录解析（TS >= 4.1 语义）。
+    "moduleResolution": "bundler",
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
+      ],
+      // 裸导入 'blog.config' → 项目根目录的 blog.config.ts
+      //（原依赖 baseUrl 解析，现改为显式 paths 映射，Vite 的 resolve.tsconfigPaths 同样生效）
+      "blog.config": [
+        "./blog.config.ts"
       ]
     },
     // Enable JSON imports.

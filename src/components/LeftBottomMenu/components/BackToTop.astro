@@ -1,16 +1,28 @@
 ---
+import Icon from '@/components/icons/Icon.astro'
 ---
 
-<div class="back_to_top w100 h100" id="BackToTopButton">
-  <div class="arrowup"></div>
-</div>
+<button class="back_to_top" id="BackToTopButton">
+  <Icon name="arrow-up" size={24} />
+</button>
 
-<script>
-  document.getElementById("BackToTopButton")?.addEventListener("click", () => {
-    document.querySelector("html")!.scrollIntoView({
-      behavior: "smooth",
-    });
-  });
+<script is:inline>
+// document.getElementById('BackToTopButton')?.addEventListener('click', () => {
+//   window.scrollTo(0, 0)
+// })
+// const button = document.getElementById('BackToTopButton')
+
+// button?.addEventListener('click', () => {
+//   // window.scrollTo({ top: 0, behavior: 'smooth' })
+//   document.scrollingElement.scrollTo({ top: 0, behavior: 'smooth' })
+// })
+document.addEventListener('DOMContentLoaded', () => {
+  const button = document.getElementById('BackToTopButton')
+  button?.addEventListener('click', () => {
+    const scroller = document.scrollingElement || document.documentElement
+    scroller.scrollTo({ top: 0, behavior: 'smooth' })
+  })
+})
 </script>
 
 <style lang="scss">
@@ -19,24 +31,7 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-
-    .arrowup {
-      display: block;
-      width: 0.8rem;
-      height: 0.8rem;
-      border: 0.1rem solid var(--text-default);
-      border-top: none;
-      border-top-width: medium;
-      border-right: none;
-      border-right-width: medium;
-      transform: translateY(35%) rotate(135deg);
-      transition: border-color 0.3s;
-    }
-
-    &:hover {
-      .arrowup {
-        border-color: var(--tips-default);
-      }
-    }
+    width: 3rem;
+    height: 3rem;
   }
 </style>

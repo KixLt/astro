@@ -1,0 +1,99 @@
+---
+import cfg from 'blog.config'
+import Icon from '@/components/icons/Icon.astro'
+
+/** 与 src/types/post.ts(Agent 1)结构兼容的最小本地类型 */
+interface PostMeta {
+  slug: string
+  title: string
+}
+
+export interface Props {
+  /** 上一篇(按 pubDate 相邻);缺失时隐藏 */
+  prev?: PostMeta
+  /** 下一篇;缺失时隐藏 */
+  next?: PostMeta
+  /** 站点 base 前缀,如 '/astro' */
+  base: string
+}
+
+const { prev, next, base } = Astro.props
+---
+
+<nav class="prev-next" aria-label={`${cfg.WebsiteSettings.text.previousPage}/${cfg.WebsiteSettings.text.nextPage}`}>
+  {
+    prev && (
+      <a class="prev-next__card" href={`${base}/blog/${prev.slug}`}>
+        <Icon name="chevron-left" size={20} />
+        <span class="prev-next__title">{prev.title}</span>
+      </a>
+    )
+  }
+
+  {
+    next && (
+      <a class="prev-next__card prev-next__card--next" href={`${base}/blog/${next.slug}`}>
+        <span class="prev-next__title">{next.title}</span>
+        <Icon name="chevron-right" size={20} />
+      </a>
+    )
+  }
+</nav>
+
+<style lang="scss" scoped>
+.prev-next {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+}
+
+.prev-next__card {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0.75rem;
+  height: 3.75rem;
+  padding: 0 1.25rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  color: var(--text-default);
+  border: 1px solid var(--border-default);
+  background-color: var(--background-card);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16),
+    0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.15s;
+
+  &:hover {
+    color: var(--primary);
+    border-color: color-mix(in srgb, var(--primary) 25%, transparent);
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.2),
+      0 4px 20px 0 rgba(0, 0, 0, 0.16);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &--next {
+    justify-content: flex-end;
+    text-align: right;
+  }
+}
+
+.prev-next__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+</style>

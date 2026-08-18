@@ -1,0 +1,75 @@
+---
+export interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+---
+
+<div class:list={['grid-shell', className]}>
+  <aside class="grid-shell__left">
+    <slot name="left" />
+  </aside>
+  <div class="grid-shell__middle">
+    <slot name="middle" />
+  </div>
+  <aside class="grid-shell__right">
+    <slot name="right" />
+  </aside>
+</div>
+
+<style lang="scss">
+  .grid-shell {
+    display: grid;
+    grid-template-columns: var(--layout-sidebar-width) minmax(0, 1fr) var(--layout-sidebar-width);
+    gap: 1rem;
+    width: calc(100vw - 4rem);
+    max-width: calc(var(--layout-page-width) - 2rem);
+    margin: 0 auto;
+    padding: 1rem;
+    align-items: start;
+
+    &__left,
+    &__right {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: sticky;
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      // 平板:左侧栏保持,中间内容与右侧栏上下堆叠
+      grid-template-columns: var(--layout-sidebar-width) minmax(0, 1fr);
+      grid-template-areas:
+        'left middle'
+        'left right';
+
+      &__left {
+        grid-area: left;
+        position: sticky;
+        top: 5rem;
+      }
+
+      &__middle {
+        grid-area: middle;
+      }
+
+      &__right {
+        grid-area: right;
+        position: static;
+      }
+    }
+
+    @media (max-width: 767px) {
+      grid-template-columns: 1fr;
+      width: 100%;
+      max-width: none;
+      padding: 1rem;
+
+      &__left,
+      &__right {
+        position: static;
+      }
+    }
+  }
+</style>

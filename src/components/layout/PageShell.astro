@@ -1,0 +1,150 @@
+---
+import cfg from 'blog.config'
+import Footer from '@/components/footer/index.astro'
+import Banner from '@/components/Header/banner/Banner.vue'
+import Navbar from '@/components/Header/nav/Navbar.vue'
+import LeftBottomMenu from '@/components/LeftBottomMenu/index.astro'
+import HeadMeta from './HeadMeta.astro'
+import '@/styles/global.scss'
+
+export interface Props {
+  /** 页面标题,会与网站标题拼接 */
+  title?: string
+  /** 页面描述 */
+  description?: string
+  /** 隐藏顶部导航 */
+  hideNav?: boolean
+  /** 隐藏 Banner */
+  hideBanner?: boolean
+  /** Banner 标题覆盖 */
+  bannerTitle?: string
+  /** Banner 背景图列表覆盖 */
+  bannerImages?: string[]
+}
+
+const {
+  title,
+  description,
+  hideNav = false,
+  hideBanner = false,
+  bannerTitle,
+  bannerImages,
+} = Astro.props
+
+const { base } = cfg.WebsiteSettings
+const navLinks = [
+  { text: cfg.WebsiteSettings.text.home, href: `${base}/blog` },
+  { text: cfg.WebsiteSettings.text.blog, href: `${base}/page` },
+  { text: cfg.WebsiteSettings.text.archive, href: `${base}/archive` },
+  { text: cfg.WebsiteSettings.text.about, href: `${base}/about` },
+  // {
+  //   text: cfg.WebsiteSettings.text.links,
+  //   children: [
+  //     { text: cfg.UserInfo.link[0]?.sitename ?? 'GitHub', href: cfg.UserInfo.link[0]?.link ?? 'https://github.com', external: true },
+  //     { text: cfg.UserInfo.link[1]?.sitename ?? 'Bilibili', href: cfg.UserInfo.link[1]?.link ?? 'https://bilibili.com', external: true },
+  //   ],
+  // },
+]
+const banner = {
+  title: bannerTitle ?? cfg.WebsiteSettings.title,
+  images: bannerImages ?? cfg.PageDefaultSettings.banner?.images ?? [],
+}
+---
+
+<html lang="zh" data-theme="auto">
+  <head>
+    <HeadMeta title={title} description={description} />
+    <link rel="icon" href={`${base}/favicon.svg`} />
+    <script is:inline>
+      (() => {
+        const theme = localStorage.getItem('theme')
+        if (theme)
+          document.documentElement.dataset.theme = theme
+      })()
+    </script>
+  </head>
+  <body>
+    <div class="page-shell__sentinel" aria-hidden="true"></div>
+    <div class="page-shell__sentinel page-shell__sentinel--hide" aria-hidden="true"></div>
+    {!hideNav && (
+      <slot name="nav">
+        <Navbar
+          client:load
+          title={cfg.WebsiteSettings.title}
+          base={base}
+          currentPath={Astro.url.pathname}
+          links={navLinks}
+        />
+      </slot>
+    )}
+    {!hideBanner && (
+      <slot name="banner">
+        <Banner client:load title={banner.title} images={banner.images} base={base} />
+      </slot>
+    )}
+    <main class="page-shell__main">
+      <slot />
+    </main>
+    <LeftBottomMenu components={['BackToTop']} />
+    <Footer content={cfg.PageDefaultSettings.footer.content} />
+    <style
+      is:global
+      define:vars={{
+        lightBg: cfg.color.light.backgroundDefault,
+        darkBg: cfg.color.dark.backgroundDefault,
+        lightCard: cfg.color.light.cardDefault,
+        darkCard: cfg.color.dark.cardDefault,
+        lightBorder: cfg.color.light.borderDefault,
+        darkBorder: cfg.color.dark.borderDefault,
+        lightBgActive: cfg.color.light.backgroundActiveDefault,
+        darkBgActive: cfg.color.dark.backgroundActiveDefault,
+        lightText: cfg.color.light.textDefault,
+        darkText: cfg.color.dark.textDefault,
+        lightTips: cfg.color.light.tipsDefault,
+        darkTips: cfg.color.dark.tipsDefault,
+        lightPrimary: cfg.color.light.primary ?? cfg.color.light.tipsDefault,
+        darkPrimary: cfg.color.dark.primary ?? cfg.color.dark.tipsDefault,
+      }}
+    >
+      :root {
+        color-scheme: light dark;
+        --background-default: light-dark(var(--lightBg), var(--darkBg));
+        --background-card: light-dark(var(--lightCard), var(--darkCard));
+        --border-default: light-dark(var(--lightBorder), var(--darkBorder));
+        --background-active: light-dark(var(--lightBgActive), var(--darkBgActive));
+        --text-default: light-dark(var(--lightText), var(--darkText));
+        --tips-default: light-dark(var(--lightTips), var(--darkTips));
+        --primary: light-dark(var(--lightPrimary), var(--darkPrimary));
+        --radius-large: 1rem;
+        --layout-page-width: 80rem;
+        --layout-sidebar-width: 17.5rem;
+      }
+      :root[data-theme='light'] {
+        color-scheme: light;
+      }
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+      }
+    </style>
+    <style>
+      .page-shell__sentinel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1px;
+        height: 1px;
+        pointer-events: none;
+      }
+
+      .page-shell__sentinel--hide {
+        height: 40px;
+      }
+
+      .page-shell__main {
+        width: 100vw;
+        min-height: 70vh;
+        background-color: var(--background-default);
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,54 @@
+---
+import cfg from 'blog.config'
+import PageShell from '@/components/layout/PageShell.astro'
+
+const { base } = cfg.WebsiteSettings
+---
+
+<PageShell hideBanner title={cfg.WebsiteSettings.text.notFoundTitle}>
+  <div class="not-found">
+    <h1 class="not-found__code">{cfg.WebsiteSettings.text.notFoundTitle}</h1>
+    <p class="not-found__tip">{cfg.WebsiteSettings.text.notFoundTip}</p>
+    <a class="not-found__home" href={`${base}/blog`}>{cfg.WebsiteSettings.text.backHome}</a>
+  </div>
+</PageShell>
+
+<style lang="scss">
+  .not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    min-height: 60vh;
+    padding: 1rem;
+    text-align: center;
+
+    &__code {
+      font-size: 8rem;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--tips-default);
+      opacity: 0.35;
+      animation: fadeInUp 0.8s ease both;
+    }
+
+    &__tip {
+      font-size: 1.1rem;
+      color: var(--text-default);
+      animation: fadeInUp 0.8s 0.15s ease both;
+    }
+
+    &__home {
+      padding: 0.6rem 2rem;
+      border-radius: 2rem;
+      background-color: var(--tips-default);
+      color: #fff;
+      animation: fadeInUp 0.8s 0.3s ease both;
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+  }
+</style>
