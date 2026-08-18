@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { satteri } from '@astrojs/markdown-satteri'
 import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
@@ -29,6 +30,14 @@ export default defineConfig({
   base: '/astro',
   devToolbar: {
     enabled: false,
+  },
+  vite: {
+    resolve: {
+      alias: {
+        '@': path.resolve('./src'),
+        'blog.config': path.resolve('./blog.config.ts'),
+      },
+    },
   },
   integrations: [mdx(), sitemap(), UnoCSS({ injectReset: true }), vue()],
   markdown: {
