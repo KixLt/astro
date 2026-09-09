@@ -12,11 +12,10 @@ title: 关于我
 
 ## 技能
 
-- **前端**:Vue 3 / Astro / TypeScript / UnoCSS / SCSS
-- **后端**:Node.js / Go
-- **工具链**:Git / Docker / Linux / Vite
+- **前端**:Vue / Astro / TypeScript / Flutter
+- **后端**:Node / Go
 - **其他**:Godot
 
 ## 作品
 
-- [GitHub](https://github.com/KixLt) — 我的Github
+- [GitHub](https://github.com/KixLt)

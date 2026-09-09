@@ -9,7 +9,6 @@ const HTML_IMAGE = /<img[^>]*src="([^"]+)"/
  * 计算文章封面:
  * 1. 优先取 frontmatter 的 cover;
  * 2. 否则正则提取正文第一张图;
- * 3. 以 '/' 开头的路径补 base 前缀(如 '/full/13.jpg' → '/astro/full/13.jpg');
  *    'http'、'data:' 开头原样使用;相对路径解析为 base + '/blog/' + slug + '/' + 路径。
  */
 export function getCoverImage(entry: CollectionEntry<'blog'>): string | undefined {

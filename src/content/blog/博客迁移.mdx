@@ -1,0 +1,75 @@
+---
+title: blog迁移二三事
+description: 记录下blog迁移遇到的一些问题
+pubDate: 2026-03-22
+tags: [typescript,前端,博客]
+category: 博客迁移
+---
+
+## window.scrollTo()不生效的问题
+
+起初是给blog写了个点击回到页面顶部的按钮
+```ts
+const button = document.getElementById('BackToTopButton')
+
+button?.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+})
+```
+dev发现点击后滚动不生效,测试了下发现点击事件可以识别到,只是
+```ts
+window.scrollTo({ top: 0, behavior: 'smooth' })
+```
+不生效。
+
+我以为Astro对原生JS有什么限制,查看了下Astro的文档,标签添加`is:inline`属性
+的话,JS就是直接内联进的html,若不加`is:inline`则是直接由vite打包进bundle里。
+
+同时,Astro的`<script>`标签还有另外一个属性`is:raw`,使用这种属性Astro则会将`<script></script>`内的代码视为文本处理。由于浏览器解析的原因，效果和`is:inline`没有什么区别。
+>Astro在`<style>/<script>`上的任何除`src = {} `外的任何属性都默认使用**is:inline**属性。
+
+使用
+```ts
+document.querySelectorAll('*').forEach(el => {
+  const style = getComputedStyle(el);
+  const overflowY = style.overflowY;
+  if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
+    console.log('可滚动元素:', el, 'scrollTop:', el.scrollTop);
+    el.style.outline = '2px solid red'; // 高亮显示，便于查看
+  }
+});
+```
+测试后log的是`body`元素，并非`window`。分析css后发现`global.css`内有
+```css
+html {
+  font-family: 'Microsoft YaHei', 'Times New Roman', Times, serif;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+```
+这会导致浏览器这个布局下把 body 作为实际的纵向滚动容器，从而让`window.scrollTo({ top: 0 })`失效，因为`window.scrollTo({ top: 0 })`实际上是在要求把`window`对应的根页面滚动位置设为0。
+但是根页面已经是`scrollTop === 0`了，给`body`元素添加`overflow: visible`则可正常。
+
+## GitHub Action构建失败原因排查
+
+blog框架完成后推送到仓库后发现git提示
+```node
+19:20:47 [build] ✓ Completed in 1.07s.
+19:20:47 [build] Building static entrypoints...
+19:20:47 [ERROR] [vite] ✗ Build failed in 791ms
+[UNLOADABLE_DEPENDENCY] Could not load src/components/footer/index.astro
+
+import Footer from "@/components/footer/index.astro";
+```
+我很奇怪为啥会提示没有组件文件，因为本地dev和preview都没有报错。
+一开始以为是路径别名问题，于是我看了下config内的别名设置发现没有什么问题。
+最后发现是因为GitHub Action的Linux严格区分大小写，windows开发时默认不区分。
+修改导入时的文件夹大小写就好了。
