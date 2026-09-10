@@ -79,6 +79,9 @@ export default defineBlogConfig({
   pages: {
     blog: {
       PageArticleCount: 10,
+      footer: {
+        content: [],
+      },
     },
   },
 })
